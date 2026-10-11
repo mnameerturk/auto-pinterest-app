@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pin Scheduler login</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #fff; color: #111; margin: 0; padding: 48px 20px; text-align: center; }
+  a.btn { display: inline-block; margin-top: 20px; padding: 14px 28px; background: #E60023; color: #fff; border-radius: 999px; text-decoration: none; font-weight: 600; }
+  p { color: #555; }
+</style>
+</head>
+<body>
+  <h2>Returning to Pin Scheduler…</h2>
+  <p>If the app doesn't open by itself, tap the button.</p>
+  <a class="btn" id="go" href="#">Open Pin Scheduler</a>
+  <script>
+    var target = "pinscheduler://oauth" + window.location.search;
+    document.getElementById("go").href = target;
+    window.location.replace(target);
+  </script>
+</body>
+</html>
