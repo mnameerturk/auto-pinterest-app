@@ -66,6 +66,7 @@ fun SettingsScreen(refreshKey: Int, onBack: () -> Unit) {
     var appId by remember { mutableStateOf(settings.appId) }
     var appSecret by remember { mutableStateOf(settings.appSecret) }
     var manualToken by remember { mutableStateOf("") }
+    var sandboxToken by remember { mutableStateOf(settings.sandboxToken) }
     var sandbox by remember { mutableStateOf(settings.sandbox) }
     var checking by remember { mutableStateOf(false) }
 
@@ -105,7 +106,7 @@ fun SettingsScreen(refreshKey: Int, onBack: () -> Unit) {
                             TextButton(onClick = { check() }, enabled = !checking) {
                                 Text(if (checking) "Checking…" else "Check connection")
                             }
-                            TextButton(onClick = { settings.disconnect(); version++ }) { Text("Disconnect") }
+                            TextButton(onClick = { settings.disconnect(); sandboxToken = ""; version++ }) { Text("Disconnect") }
                         }
                     }
                 }
@@ -127,7 +128,34 @@ fun SettingsScreen(refreshKey: Int, onBack: () -> Unit) {
                     sandbox = it
                     settings.sandbox = it
                     settings.boards = emptyList() // sandbox and live have different boards
+                    version++
                 })
+            }
+
+            if (sandbox) {
+                SectionLabel("Sandbox token (needed in Trial mode)")
+                Text(
+                    "Pinterest's sandbox doesn't accept the normal login. On developers.pinterest.com → My apps → " +
+                        "Manage → Configure, under Generate access token, choose the Sandbox option, " +
+                        "copy the token and paste it here. It lasts about 30 days; paste a new one when it expires.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    sandboxToken, { sandboxToken = it.trim() }, label = { Text("Sandbox token") },
+                    singleLine = true, modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = PasswordVisualTransformation()
+                )
+                Button(
+                    enabled = sandboxToken.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    onClick = {
+                        settings.sandboxToken = sandboxToken
+                        settings.boards = emptyList()
+                        check()
+                    }
+                ) { Text("Save sandbox token") }
             }
 
             SectionLabel("Connect with Pinterest login (recommended)")

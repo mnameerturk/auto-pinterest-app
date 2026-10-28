@@ -11,6 +11,10 @@ class Settings(ctx: Context) {
     var accessToken: String
         get() = p.getString("accessToken", "") ?: ""
         set(v) = p.edit().putString("accessToken", v).apply()
+    /** Token minted in the developer portal for api-sandbox.pinterest.com (Trial access). */
+    var sandboxToken: String
+        get() = p.getString("sandboxToken", "") ?: ""
+        set(v) = p.edit().putString("sandboxToken", v.trim()).apply()
     var refreshToken: String
         get() = p.getString("refreshToken", "") ?: ""
         set(v) = p.edit().putString("refreshToken", v).apply()
@@ -53,10 +57,10 @@ class Settings(ctx: Context) {
             p.edit().putString("boards", arr.toString()).apply()
         }
 
-    val isConnected get() = accessToken.isNotBlank()
+    val isConnected get() = if (sandbox) sandboxToken.isNotBlank() else accessToken.isNotBlank()
 
     fun disconnect() {
-        p.edit().remove("accessToken").remove("refreshToken").remove("tokenExpiresAt")
+        p.edit().remove("accessToken").remove("sandboxToken").remove("refreshToken").remove("tokenExpiresAt")
             .remove("username").remove("boards").apply()
     }
 }

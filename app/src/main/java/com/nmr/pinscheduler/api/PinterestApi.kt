@@ -76,32 +76,49 @@ class PinterestApi(private val ctx: Context) {
     // ---------- API calls ----------
 
     private suspend fun call(method: String, path: String, body: JSONObject? = null, retried: Boolean = false): JSONObject {
+        // Pinterest's sandbox does not accept login (OAuth) tokens; it needs its own token
+        // generated on the app's page at developers.pinterest.com.
+        if (settings.sandbox) {
+            if (settings.sandboxToken.isBlank()) throw ApiException(
+                401, "Sandbox mode needs a sandbox token. Open Settings and paste the sandbox token from developers.pinterest.com."
+            )
+            return try {
+                send(method, path, body, settings.sandboxToken)
+            } catch (e: ApiException) {
+                if (e.code == 401) throw ApiException(
+                    401, "Sandbox token rejected or expired. Generate a new sandbox token at developers.pinterest.com and paste it in Settings."
+                ) else throw e
+            }
+        }
         if (settings.accessToken.isBlank()) throw ApiException(401, "Not connected to Pinterest. Open Settings to connect.")
         // Refresh a little before expiry.
         if (!retried && settings.tokenExpiresAt in 1..(System.currentTimeMillis() + 5 * 60_000)) refresh()
         return try {
-            withContext(Dispatchers.IO) {
-                val conn = URL(base + path).openConnection() as HttpURLConnection
-                try {
-                    conn.requestMethod = method
-                    conn.connectTimeout = 20000
-                    conn.readTimeout = 60000
-                    conn.setRequestProperty("Authorization", "Bearer ${settings.accessToken}")
-                    conn.setRequestProperty("Accept", "application/json")
-                    if (body != null) {
-                        conn.doOutput = true
-                        conn.setRequestProperty("Content-Type", "application/json")
-                        conn.outputStream.use { it.write(body.toString().toByteArray()) }
-                    }
-                    readJson(conn)
-                } finally {
-                    conn.disconnect()
-                }
-            }
+            send(method, path, body, settings.accessToken)
         } catch (e: ApiException) {
             if (e.code == 401 && !retried && refresh()) call(method, path, body, true) else throw e
         }
     }
+
+    private suspend fun send(method: String, path: String, body: JSONObject?, token: String): JSONObject =
+        withContext(Dispatchers.IO) {
+            val conn = URL(base + path).openConnection() as HttpURLConnection
+            try {
+                conn.requestMethod = method
+                conn.connectTimeout = 20000
+                conn.readTimeout = 60000
+                conn.setRequestProperty("Authorization", "Bearer $token")
+                conn.setRequestProperty("Accept", "application/json")
+                if (body != null) {
+                    conn.doOutput = true
+                    conn.setRequestProperty("Content-Type", "application/json")
+                    conn.outputStream.use { it.write(body.toString().toByteArray()) }
+                }
+                readJson(conn)
+            } finally {
+                conn.disconnect()
+            }
+        }
 
     private fun readJson(conn: HttpURLConnection): JSONObject {
         val code = conn.responseCode
