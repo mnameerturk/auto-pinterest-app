@@ -20,6 +20,7 @@ import com.nmr.pinscheduler.data.Settings
 import com.nmr.pinscheduler.ui.AppTheme
 import com.nmr.pinscheduler.ui.BulkScreen
 import com.nmr.pinscheduler.ui.EditorScreen
+import com.nmr.pinscheduler.ui.ImportScreen
 import com.nmr.pinscheduler.ui.QueueScreen
 import com.nmr.pinscheduler.ui.SettingsScreen
 import com.nmr.pinscheduler.ui.toast
@@ -31,6 +32,7 @@ sealed class Screen {
     data object Queue : Screen()
     data class Editor(val pinId: String?) : Screen()
     data object Bulk : Screen()
+    data object Import : Screen()
     data object Settings : Screen()
 }
 
@@ -57,11 +59,13 @@ class MainActivity : ComponentActivity() {
                     Screen.Queue -> QueueScreen(
                         onNew = { screen = Screen.Editor(null) },
                         onBulk = { screen = Screen.Bulk },
+                        onImport = { screen = Screen.Import },
                         onEdit = { screen = Screen.Editor(it) },
                         onSettings = { screen = Screen.Settings },
                     )
                     is Screen.Editor -> EditorScreen(current.pinId) { screen = Screen.Queue }
                     Screen.Bulk -> BulkScreen { screen = Screen.Queue }
+                    Screen.Import -> ImportScreen { screen = Screen.Queue }
                     Screen.Settings -> SettingsScreen(settingsRefresh) { screen = Screen.Queue }
                 }
             }

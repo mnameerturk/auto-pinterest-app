@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
@@ -66,6 +67,7 @@ import java.io.File
 fun QueueScreen(
     onNew: () -> Unit,
     onBulk: () -> Unit,
+    onImport: () -> Unit,
     onEdit: (String) -> Unit,
     onSettings: () -> Unit,
 ) {
@@ -94,6 +96,12 @@ fun QueueScreen(
         },
         floatingActionButton = {
             Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                ExtendedFloatingActionButton(
+                    onClick = onImport,
+                    icon = { Icon(Icons.Default.List, null) },
+                    text = { Text("Import file") },
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                )
                 ExtendedFloatingActionButton(
                     onClick = onBulk,
                     icon = { Icon(Icons.Default.DateRange, null) },
@@ -134,7 +142,7 @@ fun QueueScreen(
                 ) {
                     Text(
                         when (tab) {
-                            0 -> "Nothing scheduled yet.\nTap New pin or Bulk schedule to start."
+                            0 -> "Nothing scheduled yet.\nTap New pin, Bulk schedule or Import file to start."
                             1 -> "No posted pins yet."
                             else -> "No failed pins."
                         },
@@ -143,7 +151,7 @@ fun QueueScreen(
                     )
                 }
             } else {
-                LazyColumn(contentPadding = PaddingValues(12.dp, 12.dp, 12.dp, 160.dp)) {
+                LazyColumn(contentPadding = PaddingValues(12.dp, 12.dp, 12.dp, 230.dp)) {
                     items(shown, key = { it.id }) { pin ->
                         PinRow(
                             pin,

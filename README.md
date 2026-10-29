@@ -3,6 +3,7 @@
 Android app for scheduling Pinterest Pins across days and times.
 
 - **New pin**: one image with title, description, link, alt text, board, and an exact date/time.
+- **Import file**: pick a pins `.zip` (folders like `day04/` with `day04.json` + images, as made for the Chrome extension). Each pin keeps its own title, description, hashtags, link, alt text, board and exact time; past times are skipped, missing boards can be created in one tap, and re-importing replaces instead of duplicating.
 - **Bulk schedule**: pick many images, set daily time slots (e.g. 9 AM, 2 PM, 8 PM), a start date and "every N days"; the app spreads the images across those slots.
 - Queue with Upcoming / Posted / Failed tabs, edit, post now, retry, delete.
 - Posts in the background with Android WorkManager at the scheduled time and notifies on success or failure.
